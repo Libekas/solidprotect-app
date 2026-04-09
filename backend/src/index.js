@@ -54,6 +54,9 @@ async function initDb() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
+    await pool.query(`
+  ALTER TABLE leads ADD CONSTRAINT leads_apollo_id_unique UNIQUE (apollo_id)
+`).catch(() => {}); // ignore if already exists
     console.log('DB init done');
   } catch (err) {
     console.error('DB init error:', err.message);
