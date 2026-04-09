@@ -4,7 +4,10 @@ const cors = require('cors');
 const { Pool } = require('pg');
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'https://solidprotect-app-1.onrender.com',
+  credentials: true
+}));
 app.use(express.json());
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
