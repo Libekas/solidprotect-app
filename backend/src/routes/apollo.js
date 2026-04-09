@@ -83,35 +83,44 @@ router.post('/import-csv', auth, upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'CSV parse viga: ' + e.message });
   }
 
-  // Apollo CSV column name mapping (handles variations)
+  // Apollo CSV column name mapping — case-insensitive, strips non-alpha
   const col = (row, ...keys) => {
     for (const k of keys) {
-      const found = Object.keys(row).find(r => r.toLowerCase().replace(/[^a-z]/g, '') === k.toLowerCase().replace(/[^a-z]/g, ''));
-      if (found && row[found]) return row[found].trim();
+      const needle = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const found = Object.keys(row).find(r => r.toLowerCase().replace(/[^a-z0-9]/g, '') === needle);
+      if (found && row[found] && row[found].trim()) return row[found].trim();
     }
     return '';
   };
+
+  // Debug: log first row keys to help diagnose mapping issues
+  if (records.length > 0) {
+    console.log('CSV columns:', Object.keys(records[0]));
+  }
 
   const imported = [];
   const skipped = [];
 
   for (const row of records) {
-    const first_name   = col(row, 'First Name', 'FirstName');
-    const last_name    = col(row, 'Last Name', 'LastName');
-    const email        = col(row, 'Email', 'Work Email');
-    const title        = col(row, 'Title', 'Job Title');
-    const company      = col(row, 'Company', 'Company Name', 'Organization');
-    const domain       = col(row, 'Website', 'Company Website', 'Company Domain');
-    const linkedin     = col(row, 'LinkedIn URL', 'Person Linkedin Url', 'LinkedIn');
-    const country      = col(row, 'Country', 'Person Country');
-    const city         = col(row, 'City', 'Person City');
-    const state        = col(row, 'State', 'Person State');
-    const phone        = col(row, 'Phone', 'Work Direct Phone', 'Mobile Phone');
-    const industry     = col(row, 'Industry', 'Company Industry');
-    const employees    = col(row, 'Employees', 'Company Headcount', '# Employees');
-    const apollo_id    = col(row, 'Person ID', 'Apollo ID', 'ID') || null;
+    // Apollo export uses these exact column names (verified from export)
+    const first_name   = col(row, 'First Name');
+    const last_name    = col(row, 'Last Name');
+    // Apollo email column variations
+    const email        = col(row, 'Email', 'Work Email', 'Primary Email', 'Email Address',
+                              'Primary Email Address', 'Work Direct Email');
+    const title        = col(row, 'Title', 'Job Title', 'Person Title');
+    const company      = col(row, 'Company', 'Company Name', 'Account Name', 'Organization Name');
+    const domain       = col(row, 'Website', 'Company Website', 'Company Domain', 'Company Linkedin Url');
+    const linkedin     = col(row, 'LinkedIn Url', 'Person Linkedin Url', 'LinkedIn URL', 'Linkedin');
+    const country      = col(row, 'Country', 'Person Country', 'Location Country');
+    const city         = col(row, 'City', 'Person City', 'Location City');
+    const state        = col(row, 'State', 'Person State', 'Location State');
+    const phone        = col(row, 'Work Direct Phone', 'Mobile Phone', 'Phone', 'Corporate Phone');
+    const industry     = col(row, 'Industry', 'Company Industry', 'Keywords');
+    const employees    = col(row, '# Employees', 'Employees', 'Company Headcount', 'Number of Employees');
+    const apollo_id    = col(row, 'Person ID', 'Apollo ID', 'ID', 'Contact ID') || null;
 
-    if (!first_name && !last_name && !email) { skipped.push(row); continue; }
+    if (!first_name && !last_name) { skipped.push(row); continue; }
 
     try {
       const result = await pool.query(
