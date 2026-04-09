@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
-const { pool } = require('../index');
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const auth = require('../middleware/auth');
 const router = express.Router();
 
