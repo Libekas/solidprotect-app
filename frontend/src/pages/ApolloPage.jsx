@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import api from '../api'
 
 const markets = [
@@ -14,7 +14,7 @@ const defaultTitles = [
 ]
 
 export default function ApolloPage() {
-  const [market, setMarket] = useState('NL')
+  const [market, setMarket] = useState('CA')
   const [titles, setTitles] = useState(defaultTitles)
   const [titleInput, setTitleInput] = useState('')
   const [results, setResults] = useState([])
@@ -23,8 +23,11 @@ export default function ApolloPage() {
   const [campaignId, setCampaignId] = useState('')
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [csvUploading, setCsvUploading] = useState(false)
   const [total, setTotal] = useState(0)
   const [newCampaign, setNewCampaign] = useState('')
+  const [csvResult, setCsvResult] = useState(null)
+  const fileInputRef = useRef()
 
   useEffect(() => {
     api.get('/campaigns').then(r => { setCampaigns(r.data); if (r.data[0]) setCampaignId(r.data[0].id) }).catch(() => {})
@@ -34,6 +37,7 @@ export default function ApolloPage() {
     setLoading(true)
     setResults([])
     setSelected([])
+    setCsvResult(null)
     try {
       const res = await api.post('/apollo/search', { market, titles, limit: 25 })
       setResults(res.data.people)
@@ -68,6 +72,29 @@ export default function ApolloPage() {
     }
   }
 
+  const handleCsvUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!campaignId) { alert('Vali esmalt kampaania'); fileInputRef.current.value = ''; return }
+    setCsvUploading(true)
+    setCsvResult(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('campaign_id', campaignId)
+      formData.append('market', market)
+      const res = await api.post('/apollo/import-csv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      setCsvResult(res.data)
+    } catch (err) {
+      alert('CSV viga: ' + (err.response?.data?.error || err.message))
+    } finally {
+      setCsvUploading(false)
+      fileInputRef.current.value = ''
+    }
+  }
+
   const toggleAll = () => setSelected(selected.length === results.length ? [] : results.map((_, i) => i))
 
   return (
@@ -78,7 +105,10 @@ export default function ApolloPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20, display: 'flex', gap: 20 }}>
+        {/* Left panel */}
         <div style={{ width: 260, flexShrink: 0 }}>
+
+          {/* Search filters */}
           <div style={{ background: '#fff', border: '0.5px solid #e8e6e0', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 12 }}>Otsingufiltrid</div>
 
@@ -100,16 +130,19 @@ export default function ApolloPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <input value={titleInput} onChange={e => setTitleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && titleInput.trim()) { setTitles(prev => [...prev, titleInput.trim()]); setTitleInput('') } }} placeholder="Lisa roll..." style={{ flex: 1, padding: '6px 8px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 12, outline: 'none', background: '#fafaf9' }} />
+                <input value={titleInput} onChange={e => setTitleInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && titleInput.trim()) { setTitles(prev => [...prev, titleInput.trim()]); setTitleInput('') } }}
+                  placeholder="Lisa roll..." style={{ flex: 1, padding: '6px 8px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 12, outline: 'none', background: '#fafaf9' }} />
               </div>
             </div>
 
-            <button onClick={search} disabled={loading} style={{ width: '100%', padding: '9px', background: '#D85A30', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500 }}>
+            <button onClick={search} disabled={loading} style={{ width: '100%', padding: '9px', background: '#D85A30', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
               {loading ? 'Otsin...' : 'Otsi kontakte'}
             </button>
           </div>
 
-          <div style={{ background: '#fff', border: '0.5px solid #e8e6e0', borderRadius: 12, padding: 16 }}>
+          {/* Campaign */}
+          <div style={{ background: '#fff', border: '0.5px solid #e8e6e0', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 12 }}>Kampaania</div>
             <select value={campaignId} onChange={e => setCampaignId(e.target.value)} style={{ width: '100%', padding: '7px 10px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 13, background: '#fafaf9', outline: 'none', marginBottom: 8 }}>
               <option value="">Vali kampaania...</option>
@@ -117,19 +150,57 @@ export default function ApolloPage() {
             </select>
             <div style={{ display: 'flex', gap: 6 }}>
               <input value={newCampaign} onChange={e => setNewCampaign(e.target.value)} placeholder="Uus kampaania..." style={{ flex: 1, padding: '6px 8px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 12, outline: 'none', background: '#fafaf9' }} />
-              <button onClick={createCampaignAndImport} style={{ padding: '6px 10px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 12, background: '#fff' }}>+</button>
+              <button onClick={createCampaignAndImport} style={{ padding: '6px 10px', border: '0.5px solid #ddd', borderRadius: 8, fontSize: 12, background: '#fff', cursor: 'pointer' }}>+</button>
             </div>
             {selected.length > 0 && (
-              <button onClick={importSelected} disabled={importing} style={{ width: '100%', padding: '9px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, marginTop: 12 }}>
+              <button onClick={importSelected} disabled={importing} style={{ width: '100%', padding: '9px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, marginTop: 12, cursor: 'pointer' }}>
                 {importing ? 'Impordin...' : `Impordi ${selected.length} kontakti`}
               </button>
             )}
           </div>
+
+          {/* CSV Import */}
+          <div style={{ background: '#fff', border: '0.5px solid #e8e6e0', borderRadius: 12, padding: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 4 }}>CSV import</div>
+            <div style={{ fontSize: 11, color: '#aaa', marginBottom: 12 }}>Apollo.io eksporditud CSV fail</div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleCsvUpload}
+              style={{ display: 'none' }}
+              id="csv-upload"
+            />
+            <label htmlFor="csv-upload" style={{
+              display: 'block', width: '100%', padding: '9px', background: csvUploading ? '#f0ede8' : '#fafaf9',
+              border: '0.5px dashed #ccc', borderRadius: 8, fontSize: 13, fontWeight: 500,
+              textAlign: 'center', cursor: campaignId ? 'pointer' : 'not-allowed',
+              color: campaignId ? '#1a1a1a' : '#aaa', boxSizing: 'border-box'
+            }}>
+              {csvUploading ? 'Impordin...' : '↑ Lae CSV üles'}
+            </label>
+
+            {csvResult && (
+              <div style={{ marginTop: 10, padding: '10px 12px', background: '#EAF3DE', borderRadius: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: '#3B6D11', marginBottom: 2 }}>Import õnnestus</div>
+                <div style={{ fontSize: 11, color: '#555' }}>
+                  Imporditud: <strong>{csvResult.imported}</strong> / {csvResult.total}<br/>
+                  {csvResult.skipped > 0 && <span style={{ color: '#aaa' }}>Vahele jäetud: {csvResult.skipped}</span>}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
+        {/* Results table */}
         <div style={{ flex: 1 }}>
           {results.length === 0 && !loading && (
-            <div style={{ textAlign: 'center', color: '#aaa', fontSize: 13, paddingTop: 60 }}>Vali turg ja rollid, seejärel otsi kontakte</div>
+            <div style={{ textAlign: 'center', color: '#aaa', fontSize: 13, paddingTop: 60 }}>
+              Vali turg ja rollid, seejärel otsi kontakte<br/>
+              <span style={{ fontSize: 11, marginTop: 8, display: 'block' }}>või impordi Apollo CSV vasakult</span>
+            </div>
           )}
           {results.length > 0 && (
             <>
