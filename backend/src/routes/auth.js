@@ -1,12 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../index');
+const { Pool } = require('pg');
 const router = express.Router();
 
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const JWT_SECRET = process.env.JWT_SECRET || 'solidprotect-secret-2026';
 
-// Login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -22,7 +22,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Register (first time setup)
 router.post('/register', async (req, res) => {
   const { username, password, setupKey } = req.body;
   if (setupKey !== process.env.SETUP_KEY) return res.status(403).json({ error: 'Vale setup key' });
