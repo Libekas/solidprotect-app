@@ -116,7 +116,8 @@ export default function Sidebar({ counts, onCopilotOpen }) {
           Talk with copilot
         </button>
       </div>
-
+{navItem('/dashboard', 'Dashboard')}
+<div style={{ height: '1px', background: '#E5E3DB', margin: '10px 0' }} />
       {/* Pipeline section */}
       <div style={{ padding: '10px 18px 6px', fontSize: 10, color: '#aaa', letterSpacing: '0.09em', textTransform: 'uppercase', fontWeight: 500 }}>
         Pipeline
