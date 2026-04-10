@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -6,17 +6,15 @@
   --sp-green: #2D5A27;
   --sp-green-light: #4A8C42;
   --sp-green-accent: #6AB04C;
-  --sp-green-pale: #E8F0E7;
-  --sp-green-pale2: #D0E4CE;
-  --sp-cream: #F5F4EF;
-  --sp-cream-dark: #EDEBE3;
-  --sp-border: #E5E3DB;
+  --sp-green-pale: #E6F2E5;
+  --sp-border: #ECEAE2;
+  --sp-border-light: #F2F0EB;
+  --sp-cream: #F8F7F4;
   --sp-text: #1a1a1a;
-  --sp-text-mid: #555;
   --sp-text-muted: #999;
-  --sp-red: #E05A30;
-  --sp-blue: #3A8AD4;
 }
+
+html { font-size: 15px; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -26,29 +24,17 @@ body {
 }
 
 a { text-decoration: none; color: inherit; }
-button { font-family: 'DM Sans', sans-serif; cursor: pointer; }
+button { font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s ease; }
 input, textarea, select { font-family: 'DM Sans', sans-serif; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d0cec6; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #b0ae a6; }
+::-webkit-scrollbar-thumb { background: #D8D6CE; border-radius: 3px; }
 
-/* Table rows */
-tbody tr:hover td { background: var(--sp-cream-dark) !important; }
-
-/* Focus */
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--sp-green-light) !important;
-  box-shadow: 0 0 0 2px rgba(74, 140, 66, 0.12);
+  box-shadow: 0 0 0 3px rgba(74,140,66,0.1);
 }
 
-/* Transitions */
-button, a, [role="button"] { transition: all 0.15s ease; }
-
-/* Market tags */
-.tag-ca { background: #E6F2E5; color: #2D5A27; }
-.tag-nl { background: #E6F0FB; color: #1A5FA5; }
-.tag-fi { background: #EEEDFE; color: #534AB7; }
+button:active { transform: scale(0.98); }
