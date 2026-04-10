@@ -82,7 +82,9 @@ router.post('/chat', auth, async (req, res) => {
     const reply = response.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
     res.json({ reply, messages: [...messages, { role: 'assistant', content: reply }] });
   } catch (err) {
+    console.error('Copilot error:', err.status, err.message, err.error);
     res.status(500).json({ error: err.message });
+  }
   }
 });
 
