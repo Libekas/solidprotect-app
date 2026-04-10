@@ -1,14 +1,10 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
-const { Pool } = require('pg');
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const auth = require('../middleware/auth');
 const router = express.Router();
-
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `Sa oled Solid Protect OÜ müügi-copilot. Sinu omanik on Taavi Küng.
-
 SOLID PROTECT INFO:
 - Toode: SPFR100 — puidule kantav tulekaitseaine
 - Sertifikaat: EN 13501-1 klass B-s1,d0 (RISE TG-0086-99)
@@ -77,33 +73,14 @@ Suhtled eesti ja inglise keeles. Ole konkreetne ja praktiline.`;
 router.post('/chat', auth, async (req, res) => {
   const { messages } = req.body;
   try {
-    let msgs = [...messages];
-    let finalReply = '';
-
-    while (true) {
-      const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: msgs
-      });
-
-      msgs.push({ role: 'assistant', content: response.content });
-
-      if (response.stop_reason === 'end_turn') {
-        finalReply = response.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
-        break;
-      }
-      if (response.stop_reason === 'tool_use') {
-        const toolResults = response.content
-          .filter(b => b.type === 'tool_use')
-          .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: '' }));
-        msgs.push({ role: 'user', content: toolResults });
-      } else break;
-    }
-
-    res.json({ reply: finalReply, messages: msgs });
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages,
+    });
+    const reply = response.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+    res.json({ reply, messages: [...messages, { role: 'assistant', content: reply }] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
