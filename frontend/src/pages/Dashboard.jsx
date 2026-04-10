@@ -6,6 +6,7 @@ import LeadsPage from './LeadsPage'
 import CampaignsPage from './CampaignsPage'
 import ApolloPage from './ApolloPage'
 import api from '../api'
+import DashboardPage from './DashboardPage'
 
 export default function Dashboard() {
   const [copilotOpen, setCopilotOpen] = useState(false)
@@ -24,6 +25,7 @@ export default function Dashboard() {
           <Route path="/leads/:status" element={<LeadsPage />} />
           <Route path="/campaigns" element={<CampaignsPage />} />
           <Route path="/apollo" element={<ApolloPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
       </div>
       <Copilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
