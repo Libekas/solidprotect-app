@@ -55,8 +55,9 @@ async function initDb() {
       );
     `);
     await pool.query(`
-  ALTER TABLE leads ADD CONSTRAINT leads_apollo_id_unique UNIQUE (apollo_id)
-`).catch(() => {}); // ignore if already exists
+  ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_initial TEXT;
+  ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_followup TEXT;
+`).catch(() => {});
     console.log('DB init done');
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -70,6 +71,8 @@ app.use('/api/leads', require('./routes/leads'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/copilot', require('./routes/copilot'));
 app.use('/api/apollo', require('./routes/apollo'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/emails', require('./routes/emails'));
 
 app.get('/', (req, res) => res.send('Solid Protect API töötab'));
 
