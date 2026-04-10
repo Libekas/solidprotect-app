@@ -20,13 +20,13 @@ Hello [Name],
 
 I'm reaching out to see whether a fire-retardant solution for wood could be relevant to [Company]'s projects.
 
-SPFR100 is a transparent fire-protection treatment for structural and façade wood applications where appearance, low consumption, and exterior durability matter.
+SPFR100 is a transparent fire-protection treatment for structural and facade wood applications where appearance, low consumption, and exterior durability matter.
 
 Key technical points:
 * suitable for interior and exterior wood elements
 * transparent and tintable if needed
 * European reaction-to-fire classification: EN 13501-1 B-s1,d0
-* consumption: 210 mL/m²
+* consumption: 210 mL/m2
 * non-corrosive, pH-neutral, VOC-free
 * preserves the natural appearance of wood
 
@@ -64,9 +64,9 @@ Solid Protect
 
 MEILIDE REEGLID:
 - Asenda [Name], [Company], [TURG] alati
-- Esimene meil — pikk formaat
-- Follow-up — lühike formaat
-- Ära muuda struktuuri
+- Esimene meil - pikk formaat
+- Follow-up - lühike formaat
+- Ara muuda struktuuri
 
 Suhtled eesti ja inglise keeles. Ole konkreetne ja praktiline.`;
 
@@ -79,12 +79,11 @@ router.post('/chat', auth, async (req, res) => {
       system: SYSTEM_PROMPT,
       messages,
     });
-    const reply = response.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
-    res.json({ reply, messages: [...messages, { role: 'assistant', content: reply }] });
+    const reply = response.content.filter(function(b) { return b.type === 'text'; }).map(function(b) { return b.text; }).join('\n');
+    res.json({ reply: reply, messages: messages.concat([{ role: 'assistant', content: reply }]) });
   } catch (err) {
-    console.error('Copilot error:', err.status, err.message);
-    res.status(500).json({ error: err.message });
-  }
+    console.error('Copilot error: ' + String(err.status) + ' ' + String(err.message));
+    res.status(500).json({ error: String(err.message) });
   }
 });
 
