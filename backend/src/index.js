@@ -11,7 +11,7 @@ app.use(cors({
 app.use(express.json());
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-// Auto DB init
+
 async function initDb() {
   try {
     await pool.query(`
@@ -55,9 +55,12 @@ async function initDb() {
       );
     `);
     await pool.query(`
-  ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_initial TEXT;
-  ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_followup TEXT;
-`).catch(() => {});
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_initial TEXT;
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS template_followup TEXT;
+    `).catch(() => {});
+    await pool.query(`
+      ALTER TABLE emails ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMP;
+    `).catch(() => {});
     console.log('DB init done');
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -73,6 +76,7 @@ app.use('/api/copilot', require('./routes/copilot'));
 app.use('/api/apollo', require('./routes/apollo'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/emails', require('./routes/emails'));
+app.use('/api/send', require('./routes/send'));
 
 app.get('/', (req, res) => res.send('Solid Protect API töötab'));
 
