@@ -10,7 +10,7 @@ const marketColors = {
 function StatCard({ label, value, sub, icon }) {
   return (
     <div style={{
-      background: '#fff', borderRadius: 14, padding: '20px 22px',
+      background: '#fff', borderRadius: 14, padding: '20px 22px', 
       border: '1px solid #ECEAE2',
       boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       flex: 1,
