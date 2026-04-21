@@ -1,6 +1,7 @@
 const express = require('express');
 const { Resend } = require('resend');
-const { pool } = require('../index');
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const router = express.Router();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
