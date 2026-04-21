@@ -79,7 +79,7 @@ router.post('/:id', async (req, res) => {
 
     await resend.emails.send({
       from: 'Taavi Küng <sales@solidprotect.eu>',
-      to: email.lead_email,
+      to: 'taavi.kyng@gmail.com',
       subject: email.subject,
       html: email.body.replace(/\n/g, '<br>'),
     });
