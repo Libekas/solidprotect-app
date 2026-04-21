@@ -27,7 +27,7 @@ router.post('/cron', async (req, res) => {
       try {
         await resend.emails.send({
           from: 'Taavi Küng <sales@solidprotect.eu>',
-          to: email.lead_email,
+          to: 'taavi.kyng@gmail.com',
           subject: email.subject,
           html: email.body.replace(/\n/g, '<br>'),
         });
