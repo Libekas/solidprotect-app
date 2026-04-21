@@ -43,16 +43,22 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchData() }, [])
 
-  const approve = async (emailId, leadId) => {
-    setApproving(emailId)
-    try {
-      await api.patch(`/emails/${emailId}`, { status: 'sent' })
-      await api.patch(`/leads/${leadId}`, { status: 'contacted', steps_done: 1 })
-      fetchData()
-      setSelected(null)
-    } finally {
-      setApproving(null)
-    }
+const approve = async (emailId, leadId) => {
+  setApproving(emailId)
+  try {
+    await api.patch(`/emails/${emailId}`, { status: 'approved' })
+    await api.post(`/send/${emailId}`, {}, {
+      headers: { 'x-cron-secret': 'sp-cron-2026' }
+    })
+    await api.patch(`/leads/${leadId}`, { status: 'contacted', steps_done: 1 })
+    fetchData()
+    setSelected(null)
+  } catch (e) {
+    alert('Saatmine ebaõnnestus: ' + (e.response?.data?.error || e.message))
+  } finally {
+    setApproving(null)
+  }
+}
   }
 
   const discard = async (emailId) => {
@@ -251,7 +257,7 @@ export default function DashboardPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {approving === selected.email_id ? 'Saving...' : '✓ Approve & mark sent'}
+                        {approving === selected.email_id ? 'Saadan...' : '✓ Saada email'}
                       </button>
                     </div>
                   </>
