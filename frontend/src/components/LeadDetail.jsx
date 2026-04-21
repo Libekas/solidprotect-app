@@ -34,6 +34,7 @@ function CompanyAvatar({ name, size = 36 }) {
 
 export default function LeadDetail({ lead, onClose, onUpdate }) {
   const [generating, setGenerating] = useState(false)
+  const [sending, setSending] = useState(false)
   const [emailDraft, setEmailDraft] = useState(null)
   const [emailType, setEmailType] = useState(null)
 
@@ -68,11 +69,23 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
     }
   }
 
-  const saveEmail = async (status) => {
+  const saveEmail = async (send) => {
     const lines = emailDraft.split('\n')
     const subjectLine = lines.find(l => l.startsWith('Subject:'))
     const subject = subjectLine ? subjectLine.replace('Subject:', '').trim() : 'Transparent fire protection for wood applications'
-    await api.post(`/leads/${lead.id}/emails`, { type: emailType, subject, body: emailDraft, status })
+    const res = await api.post(`/leads/${lead.id}/emails`, { type: emailType, subject, body: emailDraft, status: send ? 'approved' : 'draft' })
+    if (send) {
+      setSending(true)
+      try {
+        await api.post(`/send/${res.data.id}`, {}, {
+          headers: { 'x-cron-secret': 'sp-cron-2026' }
+        })
+      } catch (err) {
+        alert('Saatmine ebaõnnestus: ' + (err.response?.data?.error || err.message))
+      } finally {
+        setSending(false)
+      }
+    }
     onUpdate()
     setEmailDraft(null)
   }
@@ -212,21 +225,24 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
             />
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
               <button
-                onClick={() => saveEmail('draft')}
+                onClick={() => saveEmail(false)}
                 style={{
                   flex: 1, padding: '9px',
                   border: '1px solid #E0DED6', borderRadius: 9,
                   fontSize: 13, background: '#fff', color: '#555', fontWeight: 500,
+                  cursor: 'pointer',
                 }}
               >Save draft</button>
               <button
-                onClick={() => saveEmail('sent')}
+                onClick={() => saveEmail(true)}
+                disabled={sending}
                 style={{
                   flex: 1, padding: '9px',
-                  background: '#2D5A27', border: 'none', borderRadius: 9,
+                  background: sending ? '#4A8C42' : '#2D5A27', border: 'none', borderRadius: 9,
                   fontSize: 13, color: '#fff', fontWeight: 600,
+                  cursor: 'pointer',
                 }}
-              >Mark sent ✓</button>
+              >{sending ? 'Saadan...' : 'Saada email ✓'}</button>
             </div>
             <div
               onClick={() => setEmailDraft(null)}
