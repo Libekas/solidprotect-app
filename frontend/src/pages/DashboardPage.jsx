@@ -59,8 +59,6 @@ const approve = async (emailId, leadId) => {
     setApproving(null)
   }
 }
-  }
-
   const discard = async (emailId) => {
     setApproving(emailId)
     try {
