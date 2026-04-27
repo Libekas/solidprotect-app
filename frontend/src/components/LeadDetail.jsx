@@ -35,8 +35,10 @@ const labelStyle = {
 export default function LeadDetail({ lead, onClose, onUpdate }) {
   const [generating, setGenerating] = useState(false)
   const [sending, setSending] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
   const [emailDraft, setEmailDraft] = useState(null)
   const [emailType, setEmailType] = useState(null)
+  const [analysis, setAnalysis] = useState(null)
 
   if (!lead) return null
 
@@ -45,6 +47,7 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
   const generateEmail = async (type) => {
     setGenerating(true)
     setEmailType(type)
+    setAnalysis(null)
     const marketLabel = { NL: 'Netherlands', CA: 'Canada', FI: 'Finland' }
     const market = marketLabel[lead.market] || lead.market || 'Netherlands'
     const prompt = type === 'initial'
@@ -57,6 +60,31 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
       setEmailDraft('Viga: ' + err.message)
     } finally {
       setGenerating(false)
+    }
+  }
+
+  const analyzeAndImprove = async () => {
+    if (!emailDraft) return
+    setAnalyzing(true)
+    setAnalysis(null)
+    try {
+      const res = await api.post('/analyze/email', {
+        lead,
+        emailDraft,
+        emailType,
+      })
+      setAnalysis(res.data)
+    } catch (err) {
+      setAnalysis({ error: err.response?.data?.error || err.message })
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
+  const useImprovedEmail = () => {
+    if (analysis?.improved_email) {
+      setEmailDraft(analysis.improved_email)
+      setAnalysis(null)
     }
   }
 
@@ -77,6 +105,7 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
     }
     onUpdate()
     setEmailDraft(null)
+    setAnalysis(null)
   }
 
   return (
@@ -93,10 +122,7 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <Avatar name={fullName} size={44} />
-        <button
-          onClick={onClose}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 18, padding: 2, lineHeight: 1 }}
-        >✕</button>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 18, padding: 2, lineHeight: 1 }}>✕</button>
       </div>
 
       <div style={{ fontSize: 17, fontWeight: 600, color: '#f0f0f2', marginBottom: 4 }}>{fullName}</div>
@@ -116,19 +142,13 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
       ))}
 
       {/* Sequence progress */}
-      <div style={{
-        marginTop: 20, padding: 14, borderRadius: 10,
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.07)',
-      }}>
+      <div style={{ marginTop: 20, padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ ...labelStyle, marginBottom: 10 }}>Sequence progress</div>
         <div style={{ display: 'flex', gap: 6 }}>
           {Array.from({ length: lead.steps_total || 2 }).map((_, i) => (
             <div key={i} style={{
               flex: 1, height: 6, borderRadius: 3,
-              background: i < (lead.steps_done || 0) ? '#3b82f6'
-                : i === (lead.steps_done || 0) ? 'rgba(59,130,246,0.3)'
-                : 'rgba(255,255,255,0.08)',
+              background: i < (lead.steps_done || 0) ? '#3b82f6' : i === (lead.steps_done || 0) ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.08)',
             }} />
           ))}
         </div>
@@ -142,18 +162,9 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
         <div style={{ marginTop: 20 }}>
           <div style={labelStyle}>Sent emails</div>
           {lead.emails.map(e => (
-            <div key={e.id} style={{
-              padding: '10px 12px', background: 'rgba(255,255,255,0.04)',
-              borderRadius: 8, marginBottom: 6,
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderLeft: '2px solid #3b82f6',
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
-                {e.type === 'initial' ? 'Initial email' : 'Follow-up'}
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
-                {e.status} · {e.sent_at ? new Date(e.sent_at).toLocaleDateString('en-CA') : 'draft'}
-              </div>
+            <div key={e.id} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, marginBottom: 6, border: '1px solid rgba(255,255,255,0.07)', borderLeft: '2px solid #3b82f6' }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{e.type === 'initial' ? 'Initial email' : 'Follow-up'}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{e.status} · {e.sent_at ? new Date(e.sent_at).toLocaleDateString('en-CA') : 'draft'}</div>
             </div>
           ))}
         </div>
@@ -162,7 +173,59 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
       {/* Email draft */}
       {emailDraft ? (
         <div style={{ marginTop: 20 }}>
-          <div style={labelStyle}>Generated email</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={labelStyle}>Generated email</div>
+            <button
+              onClick={analyzeAndImprove}
+              disabled={analyzing}
+              style={{
+                padding: '4px 10px', borderRadius: 6,
+                background: analyzing ? 'rgba(251,191,36,0.15)' : 'rgba(251,191,36,0.1)',
+                border: '1px solid rgba(251,191,36,0.25)',
+                color: '#fbbf24', fontSize: 11, fontWeight: 600,
+                cursor: analyzing ? 'wait' : 'pointer',
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {analyzing ? 'Analyzing...' : '✦ Analyze & Improve'}
+            </button>
+          </div>
+
+          {/* Analysis result */}
+          {analysis && (
+            <div style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: analysis.error ? 'rgba(239,68,68,0.08)' : 'rgba(251,191,36,0.06)', border: analysis.error ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(251,191,36,0.15)' }}>
+              {analysis.error ? (
+                <div style={{ fontSize: 12, color: '#f87171' }}>Viga: {analysis.error}</div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600, marginBottom: 6 }}>GPT-4o analüüs</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, marginBottom: 8 }}>{analysis.analysis}</div>
+                  {analysis.issues?.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      {analysis.issues.map((issue, i) => (
+                        <div key={i} style={{ fontSize: 11.5, color: 'rgba(251,191,36,0.8)', marginBottom: 3, display: 'flex', gap: 6 }}>
+                          <span>⚠</span><span>{issue}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {analysis.improved_email && (
+                    <button
+                      onClick={useImprovedEmail}
+                      style={{
+                        width: '100%', padding: '7px', borderRadius: 7,
+                        background: 'rgba(251,191,36,0.15)',
+                        border: '1px solid rgba(251,191,36,0.3)',
+                        color: '#fbbf24', fontSize: 12, fontWeight: 600,
+                        cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >↑ Use improved version</button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
           <textarea
             value={emailDraft}
             onChange={e => setEmailDraft(e.target.value)}
@@ -175,47 +238,31 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
               color: 'rgba(255,255,255,0.7)',
               fontFamily: "'DM Sans', sans-serif",
             }}
+            onFocus={e => e.target.style.borderColor = 'rgba(96,165,250,0.4)'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
           />
+
           <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
             <button
               onClick={() => saveEmail(false)}
-              style={{
-                flex: 1, padding: '9px', borderRadius: 8,
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              }}
+              style={{ flex: 1, padding: '9px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
             >Save draft</button>
             <button
               onClick={() => saveEmail(true)}
               disabled={sending}
-              style={{
-                flex: 1, padding: '9px', borderRadius: 8,
-                background: sending ? '#2563eb' : '#3b82f6',
-                border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              style={{ flex: 1, padding: '9px', borderRadius: 8, background: sending ? '#2563eb' : '#3b82f6', border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'background 0.15s', fontFamily: "'DM Sans', sans-serif" }}
               onMouseEnter={e => { if (!sending) e.currentTarget.style.background = '#2563eb' }}
               onMouseLeave={e => { if (!sending) e.currentTarget.style.background = '#3b82f6' }}
             >{sending ? 'Saadan...' : 'Saada email ✓'}</button>
           </div>
-          <div
-            onClick={() => setEmailDraft(null)}
-            style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 10, cursor: 'pointer' }}
-          >Cancel</div>
+          <div onClick={() => { setEmailDraft(null); setAnalysis(null) }} style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 10, cursor: 'pointer' }}>Cancel</div>
         </div>
       ) : (
-        /* Action buttons */
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button
             onClick={() => generateEmail('initial')}
             disabled={generating}
-            style={{
-              padding: '9px 16px', borderRadius: 8,
-              background: generating && emailType === 'initial' ? '#2563eb' : '#3b82f6',
-              border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              transition: 'background 0.15s',
-            }}
+            style={{ padding: '9px 16px', borderRadius: 8, background: generating && emailType === 'initial' ? '#2563eb' : '#3b82f6', border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'background 0.15s', fontFamily: "'DM Sans', sans-serif" }}
             onMouseEnter={e => { if (!generating) e.currentTarget.style.background = '#2563eb' }}
             onMouseLeave={e => { if (!generating) e.currentTarget.style.background = '#3b82f6' }}
           >
@@ -224,12 +271,7 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
           <button
             onClick={() => generateEmail('followup')}
             disabled={generating}
-            style={{
-              padding: '9px 16px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-            }}
+            style={{ padding: '9px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
           >
             {generating && emailType === 'followup' ? 'Generating...' : '↩ Generate follow-up'}
           </button>
