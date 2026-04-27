@@ -77,6 +77,7 @@ app.use('/api/apollo', require('./routes/apollo'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/emails', require('./routes/emails'));
 app.use('/api/send', require('./routes/send'));
+app.use('/api/analyze', require('./routes/analyze'));
 
 app.get('/', (req, res) => res.send('Solid Protect API töötab'));
 
