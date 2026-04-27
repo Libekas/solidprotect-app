@@ -1,74 +1,35 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-
-const DARK = '#0F1A0E'
-const DARK_3 = '#1E2E1C'
-const GREEN = '#4CAF50'
-const GREEN_BRIGHT = '#6FCF72'
-const GREEN_DIM = '#2E5C30'
-const TEXT_PRIMARY = '#E8F0E7'
-const TEXT_MUTED = '#6B8A69'
-const BORDER = '#1E2E1C'
 
 export default function Sidebar({ counts, onCopilotOpen }) {
   const navigate = useNavigate()
   const loc = useLocation()
 
-  const navItem = (path, label, count, dot, icon) => {
+  const NavItem = ({ path, icon, label, count }) => {
     const active = loc.pathname === path
+    const [hov, setHov] = useState(false)
     return (
       <div
         onClick={() => navigate(path)}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
         style={{
-          padding: '10px 18px',
-          fontSize: 14.5,
-          color: active ? TEXT_PRIMARY : TEXT_MUTED,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          borderRadius: 9,
-          margin: '2px 9px',
-          background: active ? DARK_3 : 'transparent',
-          fontWeight: active ? 500 : 400,
-          transition: 'all 0.12s ease',
-          position: 'relative',
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '8px 14px', borderRadius: 8, cursor: 'pointer',
+          background: active ? 'rgba(96,165,250,0.12)' : hov ? 'rgba(255,255,255,0.05)' : 'transparent',
+          color: active ? '#93c5fd' : 'rgba(255,255,255,0.5)',
+          fontSize: 13, fontWeight: active ? 500 : 400,
+          transition: 'all 0.12s',
         }}
-        onMouseEnter={e => { if (!active) e.currentTarget.style.background = DARK_3 }}
-        onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
       >
-        {active && (
-          <div style={{
-            position: 'absolute',
-            left: 0,
-            top: '20%',
-            height: '60%',
-            width: 3,
-            borderRadius: '0 3px 3px 0',
-            background: GREEN,
-          }} />
-        )}
-        {dot && (
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%',
-            background: dot, display: 'inline-block', flexShrink: 0,
-            boxShadow: `0 0 6px ${dot}88`,
-          }} />
-        )}
-        {icon && !dot && (
-          <span style={{ opacity: active ? 1 : 0.5, display: 'flex', alignItems: 'center' }}>
-            {icon}
-          </span>
-        )}
-        <span style={{ flex: 1, letterSpacing: '0.01em' }}>{label}</span>
+        <span style={{ fontSize: 14, opacity: active ? 1 : 0.7 }}>{icon}</span>
+        <span style={{ flex: 1 }}>{label}</span>
         {count !== undefined && (
           <span style={{
-            fontSize: 11.5,
-            color: active ? GREEN_BRIGHT : TEXT_MUTED,
-            background: active ? GREEN_DIM : '#1A2819',
-            padding: '2px 8px',
-            borderRadius: 20,
-            fontWeight: 600,
+            fontSize: 11, fontWeight: 600,
+            padding: '1px 7px', borderRadius: 10,
+            background: active ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+            color: active ? '#fff' : 'rgba(255,255,255,0.5)',
           }}>{count}</span>
         )}
       </div>
@@ -77,150 +38,91 @@ export default function Sidebar({ counts, onCopilotOpen }) {
 
   return (
     <div style={{
-      width: 242,
-      minWidth: 242,
-      background: DARK,
-      borderRight: `1px solid ${BORDER}`,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      position: 'fixed',
-      left: 0,
-      top: 0,
+      width: 220, minWidth: 220,
+      background: '#111116',
+      borderRight: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex', flexDirection: 'column',
+      height: '100vh', position: 'fixed', left: 0, top: 0,
       fontFamily: "'DM Sans', sans-serif",
     }}>
       {/* Logo */}
       <div style={{
-        padding: '22px 20px 20px',
-        borderBottom: `1px solid ${BORDER}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 11,
+        padding: '20px 18px 16px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', alignItems: 'center', gap: 10,
       }}>
         <div style={{
-          width: 32, height: 32,
-          background: GREEN_DIM,
-          borderRadius: 9,
+          width: 28, height: 28, borderRadius: 7,
+          background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: `1px solid ${GREEN}33`,
           flexShrink: 0,
         }}>
-          <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-            <path d="M2 12L7 2L12 12" stroke={GREEN_BRIGHT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M4 8.5H10" stroke={GREEN_BRIGHT} strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>S</span>
         </div>
-        <span style={{ fontSize: 13.5, fontWeight: 700, letterSpacing: '0.08em', color: TEXT_PRIMARY }}>
-          SOLID<span style={{ color: GREEN }}>PROTECT</span>
-        </span>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#f0f0f2', letterSpacing: 0.5 }}>SOLID</div>
+          <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>PROTECT</div>
+        </div>
       </div>
 
       {/* Copilot button */}
-      <div style={{ padding: '16px 13px 10px' }}>
+      <div style={{ padding: '12px 14px' }}>
         <button
           onClick={onCopilotOpen}
           style={{
-            width: '100%',
-            padding: '11px 16px',
-            background: `linear-gradient(135deg, ${GREEN_DIM} 0%, #2A4A2A 100%)`,
-            color: TEXT_PRIMARY,
-            border: `1px solid ${GREEN}33`,
-            borderRadius: 11,
-            fontSize: 13.5,
-            fontWeight: 500,
-            textAlign: 'left',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            transition: 'all 0.15s ease',
+            width: '100%', padding: '8px 12px', borderRadius: 8,
+            border: '1px solid rgba(99,102,241,0.4)',
+            background: 'rgba(99,102,241,0.08)',
+            color: '#a5b4fc', fontSize: 12, fontWeight: 500,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
             fontFamily: "'DM Sans', sans-serif",
+            transition: 'background 0.15s',
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = `linear-gradient(135deg, #3A6C3A 0%, #335533 100%)`
-            e.currentTarget.style.borderColor = `${GREEN}66`
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = `linear-gradient(135deg, ${GREEN_DIM} 0%, #2A4A2A 100%)`
-            e.currentTarget.style.borderColor = `${GREEN}33`
-          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.15)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}
         >
-          <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5.5" stroke={GREEN} strokeWidth="1.2"/>
-            <path d="M4.5 7C4.5 5.619 5.619 4.5 7 4.5S9.5 5.619 9.5 7 8.381 9.5 7 9.5" stroke={GREEN} strokeWidth="1.2" strokeLinecap="round"/>
-            <circle cx="7" cy="7" r="1.2" fill={GREEN}/>
-          </svg>
-          <span>Talk with copilot</span>
-          <span style={{
-            marginLeft: 'auto',
-            fontSize: 10.5,
-            color: GREEN,
-            background: `${GREEN}22`,
-            padding: '2px 7px',
-            borderRadius: 4,
-            fontWeight: 600,
-          }}>AI</span>
+          <span style={{ fontSize: 14 }}>✦</span>
+          <span style={{ flex: 1, textAlign: 'left' }}>Talk with copilot</span>
+          <span style={{ fontSize: 11, opacity: 0.6 }}>⌘K</span>
         </button>
       </div>
 
-      {/* Dashboard */}
-      <div style={{ padding: '6px 0 2px' }}>
-        {navItem('/dashboard', 'Dashboard', undefined, undefined,
-          <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
-            <rect x="1.5" y="1.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-            <rect x="7.5" y="1.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-            <rect x="1.5" y="7.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-            <rect x="7.5" y="7.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-          </svg>
-        )}
-      </div>
+      {/* Nav */}
+      <div style={{ padding: '8px 10px', flex: 1, overflow: 'auto' }}>
+        <NavItem path="/dashboard" icon="⊞" label="Dashboard" />
 
-      <div style={{ height: 1, background: BORDER, margin: '10px 18px' }} />
-
-      <div style={{ padding: '4px 20px 8px', fontSize: 10.5, color: TEXT_MUTED, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>
-        Pipeline
-      </div>
-      {navItem('/leads/new', 'New leads', counts?.new, '#E05A30')}
-      {navItem('/leads/contacted', 'Contacted', counts?.contacted, '#3A8AD4')}
-      {navItem('/leads/replied', 'Replied', counts?.replied, GREEN)}
-
-      <div style={{ height: 1, background: BORDER, margin: '10px 18px' }} />
-
-      {navItem('/campaigns', 'Campaigns', undefined, undefined,
-        <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
-          <path d="M2 10V4.5L6.5 2L11 4.5V10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          <rect x="4.5" y="7" width="4" height="3" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
-        </svg>
-      )}
-      {navItem('/apollo', 'Find leads', undefined, undefined,
-        <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
-          <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" strokeWidth="1.2"/>
-          <path d="M8.5 8.5L11 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-        </svg>
-      )}
-
-      <div style={{ padding: '0 18px', marginTop: 'auto', paddingBottom: 22 }}>
-        <div style={{ height: 1, background: BORDER, marginBottom: 16 }} />
-        <div
-          onClick={() => { localStorage.removeItem('token'); window.location.href = '/login' }}
-          style={{
-            fontSize: 13.5,
-            color: TEXT_MUTED,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            transition: 'color 0.15s',
-            padding: '7px 4px',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = '#E05A30'}
-          onMouseLeave={e => e.currentTarget.style.color = TEXT_MUTED}
-        >
-          <svg width="14" height="14" viewBox="0 0 13 13" fill="none">
-            <path d="M8.5 4.5L11 6.5L8.5 8.5M11 6.5H5M5 2.5H2.5V10.5H5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Logi välja
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '12px 14px 6px' }}>
+          Pipeline
         </div>
+        <NavItem path="/leads/new" icon="○" label="New leads" count={counts?.new} />
+        <NavItem path="/leads/contacted" icon="◎" label="Contacted" count={counts?.contacted} />
+        <NavItem path="/leads/replied" icon="●" label="Replied" count={counts?.replied} />
+
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '12px 14px 6px' }}>
+          Tools
+        </div>
+        <NavItem path="/campaigns" icon="◈" label="Campaigns" />
+        <NavItem path="/apollo" icon="⊕" label="Find leads" />
+      </div>
+
+      {/* Bottom */}
+      <div style={{
+        padding: '12px 14px',
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <div style={{
+          width: 26, height: 26, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 600,
+        }}>T</div>
+        <span
+          onClick={() => { localStorage.removeItem('token'); window.location.href = '/login' }}
+          style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', cursor: 'pointer', opacity: 0.6, transition: 'opacity 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = 1}
+          onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
+        >Logi välja</span>
       </div>
     </div>
   )
