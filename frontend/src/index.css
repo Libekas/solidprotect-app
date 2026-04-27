@@ -18,8 +18,8 @@ html { font-size: 15px; }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--sp-cream);
-  color: var(--sp-text);
+  background: #0d0d10;
+  color: #f0f0f2;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -29,7 +29,7 @@ input, textarea, select { font-family: 'DM Sans', sans-serif; }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D8D6CE; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
