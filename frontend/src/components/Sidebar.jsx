@@ -40,7 +40,7 @@ export default function Sidebar({ counts, onCopilotOpen }) {
     <div style={{
       width: 220, minWidth: 220,
       background: '#111116',
-      borderRight: '1px solid rgba(255,255,255,0.06)',
+      borderRight: 'none',
       display: 'flex', flexDirection: 'column',
       height: '100vh', position: 'fixed', left: 0, top: 0,
       fontFamily: "'DM Sans', sans-serif",
