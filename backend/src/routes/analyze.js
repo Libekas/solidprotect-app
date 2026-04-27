@@ -68,7 +68,7 @@ Rules for improved email:
 
   try {
     const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-      model: 'gpt-5.5',
+      model: 'gpt-5.4',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 1500,
       temperature: 0.7,
