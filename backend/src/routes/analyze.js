@@ -70,7 +70,7 @@ Rules for improved email:
     const response = await axios.post('https://api.openai.com/v1/chat/completions', {
       model: 'gpt-5.4',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 1500,
+      max_completion_tokens: 1500,
       temperature: 0.7,
       response_format: { type: 'json_object' },
     }, {
