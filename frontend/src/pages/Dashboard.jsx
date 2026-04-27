@@ -19,7 +19,7 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar counts={counts} onCopilotOpen={() => setCopilotOpen(true)} />
-      <div style={{ marginLeft: 220, flex: 1, display: 'flex', overflow: 'hidden', background: '#F5F4EF' }}>
+      <div style={{ marginLeft: 242, flex: 1, display: 'flex', overflow: 'hidden', background: '#0d0d10' }}>
         <Routes>
           <Route path="/" element={<Navigate to="/leads/new" />} />
           <Route path="/leads/:status" element={<LeadsPage />} />
