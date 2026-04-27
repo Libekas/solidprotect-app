@@ -1,52 +1,76 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-const SP_GREEN = '#2D5A27'
-const SP_GREEN_LIGHT = '#4A8C42'
-const SP_GREEN_ACCENT = '#6AB04C'
-const SP_CREAM = '#F5F4EF'
-const SP_CREAM_DARK = '#EDEBE3'
+const DARK = '#0F1A0E'
+const DARK_2 = '#162115'
+const DARK_3 = '#1E2E1C'
+const GREEN = '#4CAF50'
+const GREEN_BRIGHT = '#6FCF72'
+const GREEN_DIM = '#2E5C30'
+const TEXT_PRIMARY = '#E8F0E7'
+const TEXT_MUTED = '#6B8A69'
+const BORDER = '#1E2E1C'
 
 export default function Sidebar({ counts, onCopilotOpen }) {
   const navigate = useNavigate()
   const loc = useLocation()
 
-  const navItem = (path, label, count, dot) => {
+  const navItem = (path, label, count, dot, icon) => {
     const active = loc.pathname === path
     return (
       <div
         onClick={() => navigate(path)}
         style={{
-          padding: '8px 18px',
+          padding: '9px 16px',
           fontSize: 13,
-          color: active ? SP_GREEN : '#555',
+          color: active ? TEXT_PRIMARY : TEXT_MUTED,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           gap: 9,
-          borderLeft: active ? `2px solid ${SP_GREEN}` : '2px solid transparent',
-          background: active ? '#E8F0E7' : 'transparent',
+          borderRadius: 8,
+          margin: '1px 8px',
+          background: active ? DARK_3 : 'transparent',
           fontWeight: active ? 500 : 400,
-          transition: 'all 0.15s ease',
+          transition: 'all 0.12s ease',
+          position: 'relative',
         }}
-        onMouseEnter={e => { if (!active) e.currentTarget.style.background = SP_CREAM_DARK }}
+        onMouseEnter={e => { if (!active) e.currentTarget.style.background = DARK_3 }}
         onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
       >
-        {dot && (
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%',
-            background: dot, display: 'inline-block', flexShrink: 0
+        {active && (
+          <div style={{
+            position: 'absolute',
+            left: 0,
+            top: '20%',
+            height: '60%',
+            width: 3,
+            borderRadius: '0 3px 3px 0',
+            background: GREEN,
           }} />
         )}
-        <span style={{ flex: 1 }}>{label}</span>
+        {dot && (
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: dot, display: 'inline-block', flexShrink: 0,
+            boxShadow: `0 0 6px ${dot}88`,
+          }} />
+        )}
+        {icon && !dot && (
+          <span style={{ opacity: active ? 1 : 0.5, display: 'flex', alignItems: 'center' }}>
+            {icon}
+          </span>
+        )}
+        <span style={{ flex: 1, letterSpacing: '0.01em' }}>{label}</span>
         {count !== undefined && (
           <span style={{
-            fontSize: 11,
-            color: active ? SP_GREEN : '#999',
-            background: active ? '#D0E4CE' : '#ECEAE2',
-            padding: '1px 7px',
+            fontSize: 10.5,
+            color: active ? GREEN_BRIGHT : TEXT_MUTED,
+            background: active ? GREEN_DIM : '#1A2819',
+            padding: '2px 7px',
             borderRadius: 20,
-            fontWeight: 500,
+            fontWeight: 600,
+            letterSpacing: '0.02em',
           }}>{count}</span>
         )}
       </div>
@@ -57,8 +81,8 @@ export default function Sidebar({ counts, onCopilotOpen }) {
     <div style={{
       width: 220,
       minWidth: 220,
-      background: '#fff',
-      borderRight: '1px solid #E5E3DB',
+      background: DARK,
+      borderRight: `1px solid ${BORDER}`,
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
@@ -69,85 +93,134 @@ export default function Sidebar({ counts, onCopilotOpen }) {
     }}>
       {/* Logo */}
       <div style={{
-        padding: '20px 18px 16px',
-        borderBottom: '1px solid #E5E3DB',
+        padding: '20px 18px 18px',
+        borderBottom: `1px solid ${BORDER}`,
         display: 'flex',
         alignItems: 'center',
         gap: 10,
       }}>
-        {/* SP logo ring */}
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="9" stroke={SP_GREEN_ACCENT} strokeWidth="2.2" fill="none" />
-          <circle cx="11" cy="11" r="4" stroke={SP_GREEN} strokeWidth="1.5" fill="none" />
-        </svg>
-        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.04em', color: '#1a1a1a' }}>
-          SOLID<span style={{ color: SP_GREEN }}>PROTECT</span>
+        <div style={{
+          width: 28, height: 28,
+          background: GREEN_DIM,
+          borderRadius: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: `1px solid ${GREEN}33`,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 12L7 2L12 12" stroke={GREEN_BRIGHT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 8.5H10" stroke={GREEN_BRIGHT} strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <span style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: '0.08em', color: TEXT_PRIMARY }}>
+          SOLID<span style={{ color: GREEN }}>PROTECT</span>
         </span>
       </div>
 
       {/* Copilot button */}
-      <div style={{ padding: '14px 12px 10px' }}>
+      <div style={{ padding: '14px 12px 8px' }}>
         <button
           onClick={onCopilotOpen}
           style={{
             width: '100%',
-            padding: '9px 14px',
-            background: SP_GREEN,
-            color: '#fff',
-            border: 'none',
-            borderRadius: 9,
+            padding: '10px 14px',
+            background: `linear-gradient(135deg, ${GREEN_DIM} 0%, #2A4A2A 100%)`,
+            color: TEXT_PRIMARY,
+            border: `1px solid ${GREEN}33`,
+            borderRadius: 10,
             fontSize: 12.5,
             fontWeight: 500,
             textAlign: 'left',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 7,
-            transition: 'background 0.15s ease',
+            gap: 8,
+            transition: 'all 0.15s ease',
             fontFamily: "'DM Sans', sans-serif",
+            letterSpacing: '0.01em',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = SP_GREEN_LIGHT}
-          onMouseLeave={e => e.currentTarget.style.background = SP_GREEN}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = `linear-gradient(135deg, #3A6C3A 0%, #335533 100%)`
+            e.currentTarget.style.borderColor = `${GREEN}66`
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = `linear-gradient(135deg, ${GREEN_DIM} 0%, #2A4A2A 100%)`
+            e.currentTarget.style.borderColor = `${GREEN}33`
+          }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="6" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2"/>
-            <path d="M5 7h4M7 5v4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/>
+            <circle cx="7" cy="7" r="5.5" stroke={GREEN} strokeWidth="1.2"/>
+            <path d="M4.5 7C4.5 5.619 5.619 4.5 7 4.5S9.5 5.619 9.5 7 8.381 9.5 7 9.5" stroke={GREEN} strokeWidth="1.2" strokeLinecap="round"/>
+            <circle cx="7" cy="7" r="1.2" fill={GREEN}/>
           </svg>
-          Talk with copilot
+          <span>Talk with copilot</span>
+          <span style={{
+            marginLeft: 'auto',
+            fontSize: 10,
+            color: GREEN,
+            background: `${GREEN}22`,
+            padding: '1px 6px',
+            borderRadius: 4,
+            letterSpacing: '0.05em',
+          }}>AI</span>
         </button>
       </div>
-{navItem('/dashboard', 'Dashboard')}
-<div style={{ height: '1px', background: '#E5E3DB', margin: '10px 0' }} />
+
+      {/* Dashboard */}
+      <div style={{ padding: '6px 0 2px' }}>
+        {navItem('/dashboard', 'Dashboard', undefined, undefined,
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1.5" y="1.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+            <rect x="7.5" y="1.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+            <rect x="1.5" y="7.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+            <rect x="7.5" y="7.5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+          </svg>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: BORDER, margin: '8px 16px' }} />
+
       {/* Pipeline section */}
-      <div style={{ padding: '10px 18px 6px', fontSize: 10, color: '#aaa', letterSpacing: '0.09em', textTransform: 'uppercase', fontWeight: 500 }}>
+      <div style={{ padding: '4px 18px 6px', fontSize: 9.5, color: TEXT_MUTED, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>
         Pipeline
       </div>
       {navItem('/leads/new', 'New leads', counts?.new, '#E05A30')}
       {navItem('/leads/contacted', 'Contacted', counts?.contacted, '#3A8AD4')}
-      {navItem('/leads/replied', 'Replied', counts?.replied, SP_GREEN_ACCENT)}
+      {navItem('/leads/replied', 'Replied', counts?.replied, GREEN)}
 
-      <div style={{ height: '1px', background: '#E5E3DB', margin: '10px 0' }} />
+      {/* Divider */}
+      <div style={{ height: 1, background: BORDER, margin: '8px 16px' }} />
 
-      {navItem('/campaigns', 'Campaigns')}
-      {navItem('/apollo', 'Find leads')}
-
-      <div style={{ height: '1px', background: '#E5E3DB', margin: '10px 0' }} />
+      {navItem('/campaigns', 'Campaigns', undefined, undefined,
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M2 10V4.5L6.5 2L11 4.5V10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <rect x="4.5" y="7" width="4" height="3" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+        </svg>
+      )}
+      {navItem('/apollo', 'Find leads', undefined, undefined,
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M8.5 8.5L11 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+      )}
 
       {/* Logout */}
-      <div style={{ padding: '0 18px', marginTop: 'auto', paddingBottom: 18 }}>
+      <div style={{ padding: '0 16px', marginTop: 'auto', paddingBottom: 20 }}>
+        <div style={{ height: 1, background: BORDER, marginBottom: 14 }} />
         <div
           onClick={() => { localStorage.removeItem('token'); window.location.href = '/login' }}
           style={{
             fontSize: 12,
-            color: '#bbb',
+            color: TEXT_MUTED,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 7,
             transition: 'color 0.15s',
+            padding: '6px 4px',
           }}
-          onMouseEnter={e => e.currentTarget.style.color = '#666'}
-          onMouseLeave={e => e.currentTarget.style.color = '#bbb'}
+          onMouseEnter={e => e.currentTarget.style.color = '#E05A30'}
+          onMouseLeave={e => e.currentTarget.style.color = TEXT_MUTED}
         >
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M8.5 4.5L11 6.5L8.5 8.5M11 6.5H5M5 2.5H2.5V10.5H5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
