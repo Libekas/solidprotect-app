@@ -1,35 +1,35 @@
 import React, { useState } from 'react'
 import api from '../api'
 
-const marketLabel = { NL: 'Netherlands', CA: 'Canada', FI: 'Finland' }
+const AVATAR_COLORS = [
+  ['#3b4a6b','#7b93d4'],['#4a3b6b','#9b7bd4'],['#3b6b4a','#7bd48c'],
+  ['#6b4a3b','#d4937b'],['#3b6b6a','#7bd4d3'],['#6b5a3b','#d4b87b'],
+]
+function avatarColor(name) {
+  let h = 0
+  for (let c of (name || '?')) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]
+}
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+}
 
 function Avatar({ name, size = 44 }) {
-  const initials = name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '??'
+  const [bg, fg] = avatarColor(name || '?')
   return (
     <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: '#2D5A27', color: '#fff',
+      width: size, height: size, borderRadius: '50%', background: bg, color: fg,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.32, fontWeight: 600, flexShrink: 0,
-      letterSpacing: '0.03em',
+      fontSize: size * 0.34, fontWeight: 600, letterSpacing: 0.5, flexShrink: 0,
     }}>
-      {initials}
+      {initials(name || '?')}
     </div>
   )
 }
 
-function CompanyAvatar({ name, size = 36 }) {
-  const initials = name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '?'
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: 10,
-      background: '#E6F2E5', color: '#2D5A27',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.33, fontWeight: 600, flexShrink: 0,
-    }}>
-      {initials}
-    </div>
-  )
+const labelStyle = {
+  fontSize: 10, fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.25)', marginBottom: 4,
 }
 
 export default function LeadDetail({ lead, onClose, onUpdate }) {
@@ -38,23 +38,14 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
   const [emailDraft, setEmailDraft] = useState(null)
   const [emailType, setEmailType] = useState(null)
 
-  if (!lead) return (
-    <div style={{
-      width: 320, borderLeft: '1px solid #ECEAE2',
-      background: '#FAFAF8',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{ fontSize: 14, color: '#ccc', textAlign: 'center', padding: 32 }}>
-        Select a lead to view details
-      </div>
-    </div>
-  )
+  if (!lead) return null
 
   const fullName = `${lead.first_name || ''} ${lead.last_name || ''}`.trim()
 
   const generateEmail = async (type) => {
     setGenerating(true)
     setEmailType(type)
+    const marketLabel = { NL: 'Netherlands', CA: 'Canada', FI: 'Finland' }
     const market = marketLabel[lead.market] || lead.market || 'Netherlands'
     const prompt = type === 'initial'
       ? `Genereeri esimene meil ${fullName}'ile, firma ${lead.company_name}, turg ${market}`
@@ -77,9 +68,7 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
     if (send) {
       setSending(true)
       try {
-        await api.post(`/send/${res.data.id}`, {}, {
-          headers: { 'x-cron-secret': 'sp-cron-2026' }
-        })
+        await api.post(`/send/${res.data.id}`, {}, { headers: { 'x-cron-secret': 'sp-cron-2026' } })
       } catch (err) {
         alert('Saatmine ebaõnnestus: ' + (err.response?.data?.error || err.message))
       } finally {
@@ -90,214 +79,162 @@ export default function LeadDetail({ lead, onClose, onUpdate }) {
     setEmailDraft(null)
   }
 
-  const statusColor = {
-    new: { bg: '#FEF0EB', color: '#C04A20' },
-    contacted: { bg: '#E6F0FB', color: '#1A5FA5' },
-    replied: { bg: '#E6F2E5', color: '#2D5A27' },
-  }[lead.status] || { bg: '#F2F0EB', color: '#888' }
-
   return (
-    <div style={{
-      width: 340, minWidth: 340,
-      borderLeft: '1px solid #ECEAE2',
-      background: '#fff',
-      display: 'flex', flexDirection: 'column',
-      overflow: 'hidden',
-      boxShadow: '-2px 0 12px rgba(0,0,0,0.04)',
+    <aside style={{
+      width: 320, flexShrink: 0,
+      borderLeft: '1px solid rgba(255,255,255,0.06)',
+      background: '#111116',
+      padding: 24, overflowY: 'auto',
+      animation: 'slideIn 0.18s ease',
+      fontFamily: "'DM Sans', sans-serif",
     }}>
+      <style>{`@keyframes slideIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }`}</style>
 
       {/* Header */}
-      <div style={{
-        padding: '18px 20px 16px',
-        borderBottom: '1px solid #ECEAE2',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-      }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Avatar name={fullName} />
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{fullName}</div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: 2 }}>{lead.role}</div>
-          </div>
-        </div>
-        <div
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+        <Avatar name={fullName} size={44} />
+        <button
           onClick={onClose}
-          style={{
-            width: 28, height: 28, borderRadius: 8,
-            background: '#F2F0EB', color: '#888',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', fontSize: 16, lineHeight: 1,
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = '#E8E5DC'}
-          onMouseLeave={e => e.currentTarget.style.background = '#F2F0EB'}
-        >×</div>
+          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 18, padding: 2, lineHeight: 1 }}
+        >✕</button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ fontSize: 17, fontWeight: 600, color: '#f0f0f2', marginBottom: 4 }}>{fullName}</div>
+      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>{lead.role}</div>
 
-        {/* Company block */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #F2F0EB' }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-            <CompanyAvatar name={lead.company_name} />
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>{lead.company_name}</div>
-          </div>
-          {lead.email && (
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              fontSize: 12.5, color: '#1A5FA5',
-              background: '#EEF5FD', padding: '4px 10px',
-              borderRadius: 20, marginBottom: 6,
+      {/* Fields */}
+      {[
+        ['Company', lead.company_name],
+        ['Campaign', lead.campaign_name],
+        ['Country', lead.country || lead.market],
+        ['Email', lead.email],
+      ].filter(([, v]) => v).map(([k, v]) => (
+        <div key={k} style={{ marginBottom: 14 }}>
+          <div style={labelStyle}>{k}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{v}</div>
+        </div>
+      ))}
+
+      {/* Sequence progress */}
+      <div style={{
+        marginTop: 20, padding: 14, borderRadius: 10,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.07)',
+      }}>
+        <div style={{ ...labelStyle, marginBottom: 10 }}>Sequence progress</div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Array.from({ length: lead.steps_total || 2 }).map((_, i) => (
+            <div key={i} style={{
+              flex: 1, height: 6, borderRadius: 3,
+              background: i < (lead.steps_done || 0) ? '#3b82f6'
+                : i === (lead.steps_done || 0) ? 'rgba(59,130,246,0.3)'
+                : 'rgba(255,255,255,0.08)',
+            }} />
+          ))}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+          Step {lead.steps_done || 0} of {lead.steps_total || 2}
+        </div>
+      </div>
+
+      {/* Sent emails */}
+      {lead.emails?.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <div style={labelStyle}>Sent emails</div>
+          {lead.emails.map(e => (
+            <div key={e.id} style={{
+              padding: '10px 12px', background: 'rgba(255,255,255,0.04)',
+              borderRadius: 8, marginBottom: 6,
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderLeft: '2px solid #3b82f6',
             }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <rect x="1" y="2.5" width="10" height="7" rx="1.5" stroke="#1A5FA5" strokeWidth="1.1"/>
-                <path d="M1 4l5 3.5L11 4" stroke="#1A5FA5" strokeWidth="1.1" strokeLinecap="round"/>
-              </svg>
-              {lead.email}
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
+                {e.type === 'initial' ? 'Initial email' : 'Follow-up'}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+                {e.status} · {e.sent_at ? new Date(e.sent_at).toLocaleDateString('en-CA') : 'draft'}
+              </div>
             </div>
-          )}
-          {lead.linkedin_url && (
-            <div>
-              <a href={lead.linkedin_url} target="_blank" rel="noreferrer" style={{
-                fontSize: 12.5, color: '#2D5A27', display: 'inline-flex', alignItems: 'center', gap: 4,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <rect x="1" y="1" width="10" height="10" rx="2" stroke="#2D5A27" strokeWidth="1.1"/>
-                  <path d="M3.5 5v3.5M3.5 3.5v.01M5.5 8.5V6a1 1 0 012 0v2.5M5.5 6.5h2" stroke="#2D5A27" strokeWidth="1.1" strokeLinecap="round"/>
-                </svg>
-                LinkedIn →
-              </a>
-            </div>
-          )}
+          ))}
         </div>
+      )}
 
-        {/* Tags */}
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid #F2F0EB', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {lead.market && (
-            <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, background: '#E6F2E5', color: '#2D5A27', fontWeight: 500 }}>
-              {marketLabel[lead.market] || lead.market}
-            </span>
-          )}
-          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, background: statusColor.bg, color: statusColor.color, fontWeight: 500 }}>
-            {lead.status}
-          </span>
-          {lead.campaign_name && (
-            <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, background: '#F2F0EB', color: '#666' }}>
-              {lead.campaign_name}
-            </span>
-          )}
-          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, background: '#F2F0EB', color: '#888', fontFamily: 'DM Mono, monospace' }}>
-            {lead.steps_done || 0}/{lead.steps_total || 2} steps
-          </span>
-        </div>
-
-        {/* Company description */}
-        {lead.company_description && (
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid #F2F0EB' }}>
-            <div style={{ fontSize: 11, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6, fontWeight: 500 }}>About</div>
-            <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>{lead.company_description}</div>
-          </div>
-        )}
-
-        {/* Relevancy */}
-        {lead.relevancy_score && (
-          <div style={{ margin: '14px 20px', padding: '12px 14px', background: '#E6F2E5', borderRadius: 12 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#2D5A27', lineHeight: 1 }}>{lead.relevancy_score}%</div>
-            <div style={{ fontSize: 11.5, color: '#4A8C42', marginTop: 2 }}>relevancy match · SPFR100</div>
-            {lead.relevancy_text && <div style={{ fontSize: 12.5, color: '#3a6a34', marginTop: 8, lineHeight: 1.5 }}>{lead.relevancy_text}</div>}
-          </div>
-        )}
-
-        {/* Email section */}
-        {emailDraft ? (
-          <div style={{ padding: '16px 20px' }}>
-            <div style={{ fontSize: 11, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10, fontWeight: 500 }}>Generated email</div>
-            <textarea
-              value={emailDraft}
-              onChange={e => setEmailDraft(e.target.value)}
-              style={{
-                width: '100%', height: 220,
-                padding: '10px 12px',
-                border: '1px solid #E0DED6', borderRadius: 10,
-                fontSize: 12.5, lineHeight: 1.6,
-                resize: 'vertical', outline: 'none',
-                background: '#FAFAF8', color: '#333',
-              }}
-            />
-            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-              <button
-                onClick={() => saveEmail(false)}
-                style={{
-                  flex: 1, padding: '9px',
-                  border: '1px solid #E0DED6', borderRadius: 9,
-                  fontSize: 13, background: '#fff', color: '#555', fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >Save draft</button>
-              <button
-                onClick={() => saveEmail(true)}
-                disabled={sending}
-                style={{
-                  flex: 1, padding: '9px',
-                  background: sending ? '#4A8C42' : '#2D5A27', border: 'none', borderRadius: 9,
-                  fontSize: 13, color: '#fff', fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >{sending ? 'Saadan...' : 'Saada email ✓'}</button>
-            </div>
-            <div
-              onClick={() => setEmailDraft(null)}
-              style={{ fontSize: 12.5, color: '#bbb', textAlign: 'center', marginTop: 10, cursor: 'pointer' }}
-            >Cancel</div>
-          </div>
-        ) : (
-          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* Email draft */}
+      {emailDraft ? (
+        <div style={{ marginTop: 20 }}>
+          <div style={labelStyle}>Generated email</div>
+          <textarea
+            value={emailDraft}
+            onChange={e => setEmailDraft(e.target.value)}
+            style={{
+              width: '100%', height: 200, padding: '10px 12px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 8, fontSize: 12.5, lineHeight: 1.6,
+              resize: 'vertical', outline: 'none',
+              color: 'rgba(255,255,255,0.7)',
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
             <button
-              onClick={() => generateEmail('initial')}
-              disabled={generating}
+              onClick={() => saveEmail(false)}
               style={{
-                padding: '11px 16px',
-                background: generating && emailType === 'initial' ? '#4A8C42' : '#2D5A27',
-                color: '#fff', border: 'none', borderRadius: 10,
-                fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+                flex: 1, padding: '9px', borderRadius: 8,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              }}
+            >Save draft</button>
+            <button
+              onClick={() => saveEmail(true)}
+              disabled={sending}
+              style={{
+                flex: 1, padding: '9px', borderRadius: 8,
+                background: sending ? '#2563eb' : '#3b82f6',
+                border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer',
                 transition: 'background 0.15s',
               }}
-            >
-              {generating && emailType === 'initial' ? 'Generating...' : '✉ Generate initial email'}
-            </button>
-            <button
-              onClick={() => generateEmail('followup')}
-              disabled={generating}
-              style={{
-                padding: '11px 16px',
-                background: '#fff', color: '#2D5A27',
-                border: '1.5px solid #B8D4B6', borderRadius: 10,
-                fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-            >
-              {generating && emailType === 'followup' ? 'Generating...' : '↩ Generate follow-up'}
-            </button>
-
-            {lead.emails?.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div style={{ fontSize: 11, color: '#aaa', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 500 }}>Sent emails</div>
-                {lead.emails.map(e => (
-                  <div key={e.id} style={{
-                    padding: '10px 12px', background: '#F5F4EF',
-                    borderRadius: 10, marginBottom: 6,
-                    borderLeft: '3px solid #6AB04C',
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: '#333' }}>{e.type === 'initial' ? 'Initial email' : 'Follow-up'}</div>
-                    <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-                      {e.status} · {e.sent_at ? new Date(e.sent_at).toLocaleDateString('en-CA') : 'draft'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              onMouseEnter={e => { if (!sending) e.currentTarget.style.background = '#2563eb' }}
+              onMouseLeave={e => { if (!sending) e.currentTarget.style.background = '#3b82f6' }}
+            >{sending ? 'Saadan...' : 'Saada email ✓'}</button>
           </div>
-        )}
-      </div>
-    </div>
+          <div
+            onClick={() => setEmailDraft(null)}
+            style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 10, cursor: 'pointer' }}
+          >Cancel</div>
+        </div>
+      ) : (
+        /* Action buttons */
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button
+            onClick={() => generateEmail('initial')}
+            disabled={generating}
+            style={{
+              padding: '9px 16px', borderRadius: 8,
+              background: generating && emailType === 'initial' ? '#2563eb' : '#3b82f6',
+              border: 'none', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => { if (!generating) e.currentTarget.style.background = '#2563eb' }}
+            onMouseLeave={e => { if (!generating) e.currentTarget.style.background = '#3b82f6' }}
+          >
+            {generating && emailType === 'initial' ? 'Generating...' : '✉ Generate initial email'}
+          </button>
+          <button
+            onClick={() => generateEmail('followup')}
+            disabled={generating}
+            style={{
+              padding: '9px 16px', borderRadius: 8,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+            }}
+          >
+            {generating && emailType === 'followup' ? 'Generating...' : '↩ Generate follow-up'}
+          </button>
+        </div>
+      )}
+    </aside>
   )
 }
