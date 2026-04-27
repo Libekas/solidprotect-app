@@ -4,12 +4,17 @@ import api from '../api'
 import LeadDetail from '../components/LeadDetail'
 
 const marketTag = {
-  NL: { bg: '#E6F0FB', color: '#1A5FA5', label: 'Netherlands' },
-  CA: { bg: '#E6F2E5', color: '#2D5A27', label: 'Canada' },
-  FI: { bg: '#EEEDFE', color: '#534AB7', label: 'Finland' }
+  NL: { bg: '#1A3A5C', color: '#6BAED6', label: 'Netherlands' },
+  CA: { bg: '#1A3A1A', color: '#6FCF72', label: 'Canada' },
+  FI: { bg: '#2D1A5C', color: '#A78BFA', label: 'Finland' }
 }
 
 const statusTitles = { new: 'New Leads', contacted: 'Contacted Leads', replied: 'Replied Leads' }
+const statusColors = {
+  new: { bg: '#2A1A0E', color: '#E8935A' },
+  contacted: { bg: '#0E1A2A', color: '#6BAED6' },
+  replied: { bg: '#0E1A0E', color: '#6FCF72' },
+}
 
 export default function LeadsPage() {
   const { status } = useParams()
@@ -37,49 +42,56 @@ export default function LeadsPage() {
     setSelected(res.data)
   }
 
+  const sc = statusColors[status] || statusColors.new
+
   return (
-    <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: '100vh', background: '#F8F7F4' }}>
+    <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: '100vh', background: '#111A10' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Header */}
         <div style={{
-          padding: '16px 28px',
-          background: '#fff',
-          borderBottom: '1px solid #ECEAE2',
+          padding: '18px 32px',
+          background: '#0F1A0E',
+          borderBottom: '1px solid #1E2E1C',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#E8F0E7', letterSpacing: '-0.01em' }}>
               {statusTitles[status] || 'Leads'}
             </span>
             <span style={{
-              fontSize: 12, color: '#2D5A27',
-              background: '#E6F2E5',
-              padding: '2px 9px', borderRadius: 20, fontWeight: 500
+              fontSize: 12.5,
+              color: sc.color,
+              background: sc.bg,
+              padding: '3px 10px',
+              borderRadius: 20,
+              fontWeight: 600,
+              letterSpacing: '0.02em',
             }}>
               {leads.length}
             </span>
           </div>
           <div style={{ position: 'relative' }}>
-            <svg style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="6" cy="6" r="4.5" stroke="#aaa" strokeWidth="1.3"/>
-              <path d="M9.5 9.5L12 12" stroke="#aaa" strokeWidth="1.3" strokeLinecap="round"/>
+            <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="#4A6A48" strokeWidth="1.3"/>
+              <path d="M9.5 9.5L12 12" stroke="#4A6A48" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search leads..."
               style={{
-                padding: '8px 14px 8px 32px',
-                border: '1px solid #E0DED6',
+                padding: '9px 16px 9px 34px',
+                border: '1px solid #1E2E1C',
                 borderRadius: 10,
-                fontSize: 13.5,
-                background: '#FAFAF8',
+                fontSize: 14,
+                background: '#162115',
                 outline: 'none',
-                width: 220,
-                color: '#333',
+                width: 240,
+                color: '#C8D8C7',
+                fontFamily: "'DM Sans', sans-serif",
               }}
             />
           </div>
@@ -88,24 +100,24 @@ export default function LeadsPage() {
         {/* Table */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: 60, textAlign: 'center', color: '#bbb', fontSize: 14 }}>Loading...</div>
+            <div style={{ padding: 80, textAlign: 'center', color: '#3A5A38', fontSize: 15 }}>Loading...</div>
           ) : leads.length === 0 ? (
-            <div style={{ padding: 60, textAlign: 'center', color: '#bbb', fontSize: 14 }}>
+            <div style={{ padding: 80, textAlign: 'center', color: '#3A5A38', fontSize: 15 }}>
               No leads yet. Import via Apollo.
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#fff', position: 'sticky', top: 0, zIndex: 1 }}>
+                <tr style={{ background: '#0F1A0E', position: 'sticky', top: 0, zIndex: 1 }}>
                   {['Name', 'Company', 'Campaign', 'Role', 'Country', 'Step'].map(h => (
                     <th key={h} style={{
-                      fontSize: 11.5,
-                      color: '#aaa',
-                      fontWeight: 500,
+                      fontSize: 11,
+                      color: '#4A6A48',
+                      fontWeight: 600,
                       textAlign: 'left',
-                      padding: '10px 20px',
-                      borderBottom: '1px solid #ECEAE2',
-                      letterSpacing: '0.03em',
+                      padding: '11px 22px',
+                      borderBottom: '1px solid #1E2E1C',
+                      letterSpacing: '0.09em',
                       textTransform: 'uppercase',
                     }}>{h}</th>
                   ))}
@@ -121,31 +133,32 @@ export default function LeadsPage() {
                       key={lead.id}
                       onClick={() => fetchSelected(lead)}
                       style={{
-                        background: isSelected ? '#EDF4EC' : '#fff',
+                        background: isSelected ? '#162115' : 'transparent',
                         cursor: 'pointer',
-                        borderLeft: isSelected ? '3px solid #2D5A27' : '3px solid transparent',
+                        borderLeft: isSelected ? '3px solid #4CAF50' : '3px solid transparent',
                         transition: 'background 0.1s',
                       }}
-                      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F5F4EF' }}
-                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = '#fff' }}
+                      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#141F13' }}
+                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
                     >
-                      <td style={{ padding: '13px 20px', fontSize: 14, fontWeight: 600, borderBottom: '1px solid #F2F0EB', color: '#1a1a1a' }}>{name}</td>
-                      <td style={{ padding: '13px 20px', fontSize: 13.5, color: '#666', borderBottom: '1px solid #F2F0EB' }}>{lead.company_name}</td>
-                      <td style={{ padding: '13px 20px', fontSize: 13, color: '#888', borderBottom: '1px solid #F2F0EB', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.campaign_name || '—'}</td>
-                      <td style={{ padding: '13px 20px', fontSize: 13.5, color: '#666', borderBottom: '1px solid #F2F0EB' }}>{lead.role}</td>
-                      <td style={{ padding: '13px 20px', borderBottom: '1px solid #F2F0EB' }}>
+                      <td style={{ padding: '14px 22px', fontSize: 14.5, fontWeight: 600, borderBottom: '1px solid #162115', color: '#D8E8D7' }}>{name}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#7A9A78', borderBottom: '1px solid #162115' }}>{lead.company_name}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 13.5, color: '#5A7A58', borderBottom: '1px solid #162115', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.campaign_name || '—'}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#7A9A78', borderBottom: '1px solid #162115' }}>{lead.role}</td>
+                      <td style={{ padding: '14px 22px', borderBottom: '1px solid #162115' }}>
                         {tag
-                          ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: tag.bg, color: tag.color, fontWeight: 500 }}>{tag.label}</span>
-                          : <span style={{ fontSize: 13, color: '#888' }}>{lead.country}</span>
+                          ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: tag.bg, color: tag.color, fontWeight: 600 }}>{tag.label}</span>
+                          : <span style={{ fontSize: 13.5, color: '#5A7A58' }}>{lead.country}</span>
                         }
                       </td>
-                      <td style={{ padding: '13px 20px', borderBottom: '1px solid #F2F0EB' }}>
+                      <td style={{ padding: '14px 22px', borderBottom: '1px solid #162115' }}>
                         <span style={{
-                          fontSize: 12,
+                          fontSize: 12.5,
                           fontFamily: 'DM Mono, monospace',
-                          color: lead.steps_done > 0 ? '#2D5A27' : '#bbb',
-                          background: lead.steps_done > 0 ? '#E6F2E5' : '#F2F0EB',
-                          padding: '2px 8px', borderRadius: 6, fontWeight: 500
+                          color: lead.steps_done > 0 ? '#6FCF72' : '#3A5A38',
+                          background: lead.steps_done > 0 ? '#1A3A1A' : '#141F13',
+                          padding: '3px 9px', borderRadius: 6, fontWeight: 600,
+                          border: lead.steps_done > 0 ? '1px solid #2E5C30' : '1px solid #1E2E1C',
                         }}>
                           {lead.steps_done || 0}/{lead.steps_total || 2}
                         </span>
