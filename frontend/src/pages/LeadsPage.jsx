@@ -75,8 +75,8 @@ export default function LeadsPage() {
           </div>
           <div style={{ position: 'relative' }}>
             <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="6" cy="6" r="4.5" stroke="#4A6A48" strokeWidth="1.3"/>
-              <path d="M9.5 9.5L12 12" stroke="#4A6A48" strokeWidth="1.3" strokeLinecap="round"/>
+              <circle cx="6" cy="6" r="4.5" stroke="#6A9A68" strokeWidth="1.3"/>
+              <path d="M9.5 9.5L12 12" stroke="#6A9A68" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>
             <input
               value={search}
@@ -100,9 +100,9 @@ export default function LeadsPage() {
         {/* Table */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: 80, textAlign: 'center', color: '#3A5A38', fontSize: 15 }}>Loading...</div>
+            <div style={{ padding: 80, textAlign: 'center', color: '#5A7A58', fontSize: 15 }}>Loading...</div>
           ) : leads.length === 0 ? (
-            <div style={{ padding: 80, textAlign: 'center', color: '#3A5A38', fontSize: 15 }}>
+            <div style={{ padding: 80, textAlign: 'center', color: '#5A7A58', fontSize: 15 }}>
               No leads yet. Import via Apollo.
             </div>
           ) : (
@@ -112,7 +112,7 @@ export default function LeadsPage() {
                   {['Name', 'Company', 'Campaign', 'Role', 'Country', 'Step'].map(h => (
                     <th key={h} style={{
                       fontSize: 11,
-                      color: '#4A6A48',
+                      color: '#6A9A68',
                       fontWeight: 600,
                       textAlign: 'left',
                       padding: '11px 22px',
@@ -141,21 +141,21 @@ export default function LeadsPage() {
                       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#141F13' }}
                       onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
                     >
-                      <td style={{ padding: '14px 22px', fontSize: 14.5, fontWeight: 600, borderBottom: '1px solid #162115', color: '#D8E8D7' }}>{name}</td>
-                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#7A9A78', borderBottom: '1px solid #162115' }}>{lead.company_name}</td>
-                      <td style={{ padding: '14px 22px', fontSize: 13.5, color: '#5A7A58', borderBottom: '1px solid #162115', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.campaign_name || '—'}</td>
-                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#7A9A78', borderBottom: '1px solid #162115' }}>{lead.role}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 14.5, fontWeight: 600, borderBottom: '1px solid #162115', color: '#E8F4E7' }}>{name}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#A8C8A6', borderBottom: '1px solid #162115' }}>{lead.company_name}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 13.5, color: '#7A9A78', borderBottom: '1px solid #162115', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.campaign_name || '—'}</td>
+                      <td style={{ padding: '14px 22px', fontSize: 14, color: '#A8C8A6', borderBottom: '1px solid #162115' }}>{lead.role}</td>
                       <td style={{ padding: '14px 22px', borderBottom: '1px solid #162115' }}>
                         {tag
                           ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: tag.bg, color: tag.color, fontWeight: 600 }}>{tag.label}</span>
-                          : <span style={{ fontSize: 13.5, color: '#5A7A58' }}>{lead.country}</span>
+                          : <span style={{ fontSize: 13.5, color: '#7A9A78' }}>{lead.country}</span>
                         }
                       </td>
                       <td style={{ padding: '14px 22px', borderBottom: '1px solid #162115' }}>
                         <span style={{
                           fontSize: 12.5,
                           fontFamily: 'DM Mono, monospace',
-                          color: lead.steps_done > 0 ? '#6FCF72' : '#3A5A38',
+                          color: lead.steps_done > 0 ? '#6FCF72' : '#5A7A58',
                           background: lead.steps_done > 0 ? '#1A3A1A' : '#141F13',
                           padding: '3px 9px', borderRadius: 6, fontWeight: 600,
                           border: lead.steps_done > 0 ? '1px solid #2E5C30' : '1px solid #1E2E1C',
